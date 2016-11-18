@@ -23,8 +23,121 @@ The app can be built with `gradle clean build` which results in a standalone jar
 
 # Running the Docker images
 
+# Publishing the Docker images
+
+Kubernetes will have to pull the docker image from a registry. For this example we can use a public repository on DockerHub. Register on [docker.com](http://docker.com) to create a docker ID.
+You can now log into your DockerHub account from your machine with:
+
+    docker login
+
+Push your image to DockerHub with:    
+
+    docker push sbrosinski/demo-service
+
+The image for the demo service is publicly available at [https://hub.docker.com/r/sbrosinski/demo-service/](https://hub.docker.com/r/sbrosinski/demo-service/).     
+
 # Setting up Kubernetes
+
+We're using the local Kubernetes cluster provided by minikube. Start your cluster with:
+
+    minikube start
+
+You can take a look at the (still empty) Kubernetes dashboard with:
+
+    minikube dashboard        
 
 # Deploying the service to Kubernetes
 
+To run our application on the minikube cluster we need to specify a deployment. The deployment descriptor looks like this:
 
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+    name: demo-service-deployment
+    spec:
+    replicas: 2 # tells deployment to run 2 pods matching the template
+    template: # create pods using pod definition in this template
+        metadata:
+        labels:
+            app: demo-service
+        spec:
+        containers:
+        - name: demo-service
+            image: sbrosinski/demo-service
+            ports:
+            - containerPort: 8090
+
+Create this deployment on the cluster using kubectl:
+
+    kubectl create -f deployment.yml 
+
+You can look at the deployment with:
+
+    kubectl describe deployment demo-service-deployment
+
+    Name:  			demo-service-deployment
+    Namespace:     		default
+    CreationTimestamp:     	Fri, 18 Nov 2016 11:42:05 +0100
+    Labels:			app=demo-service
+    Selector:      		app=demo-service
+    Replicas:      		2 updated | 2 total | 2 available | 0 unavailable
+    StrategyType:  		RollingUpdate
+    MinReadySeconds:       	0
+    RollingUpdateStrategy: 	1 max unavailable, 1 max surge
+    OldReplicaSets:		<none>
+    NewReplicaSet: 		demo-service-deployment-1946011246 (2/2 replicas created)
+    Events:
+    FirstSeen    	LastSeen       	Count  	From   				SubobjectPath  	Type   		Reason 			Message
+    ---------    	--------       	-----  	----   				-------------  	--------       	------ 			-------
+    1m   		1m     		1      	{deployment-controller }       			Normal 		ScalingReplicaSet      	Scaled up replica set demo-service-deployment-1946011246 to 2
+
+Two pods have been created, a replica set, and the default rolling update strategy. You can also look at the pods with:
+
+    kubectl get pods
+
+    NAME                                       READY     STATUS    RESTARTS   AGE
+    demo-service-deployment-1946011246-ap47n   1/1       Running   0          3m
+    demo-service-deployment-1946011246-u3dcj   1/1       Running   0          3m
+
+We can join these pods as part of a service and expose it outside of our cluster. Create a service with:
+
+    kubectl create -f service.yml
+
+The service descriptor looks like this:
+
+    apiVersion: v1
+    kind: Service
+    metadata:
+    name: demo-service
+    spec:
+    ports:
+        - port: 8090
+        targetPort: 8090
+    selector:
+        app: demo-service
+    type: NodePort
+
+By specifying a service type of `NodePort` we declare to expose the service outside the cluster. Type `LoadBalance`would create a load balancer (e.g. ELB on AWS, but this feature is not availabe for minikube), type `ClusterIP` would expose the service only within the cluster.
+We can look at the service details with:
+
+    kubectl describe service demo-service
+
+    Name:  			demo-service
+    Namespace:     	default
+    Labels:			<none>
+    Selector:      	app=demo-service
+    Type:  			NodePort
+    IP:    			10.0.0.221
+    Port:  			<unset>	8090/TCP
+    NodePort:      	<unset>	31039/TCP
+    Endpoints:     	172.17.0.6:8090,172.17.0.7:8090
+    Session Affinity:  None
+    No events.
+
+To now access the service, we can use a minikube command to tell us the exact service address:
+
+    minikube service demo-service
+
+This would open your browser and point it, for example, to `http://192.168.99.100:31039`. Port 31029 is the NodePort we requested and the IP address is the address of our minikube cluster. We can now access the service routes:
+
+    curl http://192.168.99.100:31039/hello => {"greeting":"hello world"}        
