@@ -35,6 +35,18 @@ Now we create a container for our demo service inherating from that base image:
     cd docker/demo-service
     docker build -t sbrosinski/demo-service .
 
+This Dockerfile is very simple and based on [Spring Boot's docker intro](https://spring.io/guides/gs/spring-boot-docker/):
+
+    FROM sbrosinski/minimal-java
+    VOLUME /tmp
+    EXPOSE 8090
+    ADD demo-service-0.0.1-SNAPSHOT.jar app.jar
+    RUN sh -c 'touch /app.jar'
+    ENV JAVA_OPTS=""
+    ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar" ]
+
+If you do this in production [you should probably add some memory limiting options](http://matthewkwilliams.com/index.php/2016/03/17/docker-cgroups-memory-constraints-and-java-cautionary-tale/) to the java call.
+
 # Running the Docker image
 
 To try it out, we can run it locally just using docker:

@@ -1,5 +1,4 @@
-FROM b7i/minimal-java
-
+FROM sbrosinski/minimal-java
 VOLUME /tmp
 EXPOSE 8090
 ADD demo-service-0.0.1-SNAPSHOT.jar app.jar
