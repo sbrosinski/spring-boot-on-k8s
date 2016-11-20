@@ -20,7 +20,7 @@ The details of this service don't matter much. I used the [Spring Initializr](ht
 
 The app can be built with `gradle clean build` which results in a standalone jar named `demo-service-0.0.1-SNAPSHOT.jar` in `build/libs`. The simplest way to run the app is with `java -jar build/libs/demo-service-0.0.1-SNAPSHOT.jar`.
 
-# Creating a Docker images
+## Creating a Docker image
 
 We need a container which has a JDK. If you just create an Ubuntu image with the standard Oracle JDK installation, you will end up with and image size of about 1 GB. Not nice to work with. There are better options though: [Creating a minimial JDK installation based on an AlpineLinux image](https://developer.atlassian.com/blog/2015/08/minimal-java-docker-containers/).
 The `docker/minimal-java` directory contains a Dockerfile I generated taking that approach.
@@ -47,7 +47,7 @@ This Dockerfile is very simple and based on [Spring Boot's docker intro](https:/
 
 If you do this in production [you should probably add some memory limiting options](http://matthewkwilliams.com/index.php/2016/03/17/docker-cgroups-memory-constraints-and-java-cautionary-tale/) to the java call.
 
-# Running the Docker image
+## Running the Docker image
 
 To try it out, we can run it locally just using docker:
 
@@ -55,7 +55,7 @@ To try it out, we can run it locally just using docker:
     curl http://localhost:8090/hello => {"greeting":"hello world"}
     docker stop demo-service
 
-# Publishing the Docker image
+## Publishing the Docker image
 
 Kubernetes will have to pull the docker image from a registry. For this example we can use a public repository on DockerHub. Register on [docker.com](http://docker.com) to create a docker ID.
 You can now log into your DockerHub account from your machine with:
@@ -68,7 +68,7 @@ Push your image to DockerHub with:
 
 The image for the demo service is publicly available at [https://hub.docker.com/r/sbrosinski/demo-service/](https://hub.docker.com/r/sbrosinski/demo-service/).     
 
-# Setting up Kubernetes
+## Setting up Kubernetes
 
 We're using the local Kubernetes cluster provided by minikube. Start your cluster with:
 
@@ -78,7 +78,7 @@ You can take a look at the (still empty) Kubernetes dashboard with:
 
     minikube dashboard        
 
-# Deploying the service to Kubernetes
+## Deploying the service to Kubernetes
 
 To run our application on the minikube cluster we need to specify a deployment. The deployment descriptor looks like this:
 
