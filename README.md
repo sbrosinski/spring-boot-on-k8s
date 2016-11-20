@@ -1,6 +1,7 @@
 # Tutorial: Deploying a Spring Boot app on Kubernetes
 
 I set up this project to demonstrate how to dockerize a Spring Boot app and deploy, configure and scale it on Kubernetes.
+In this tutorial I'm using [minikube](https://github.com/kubernetes/minikube) locally, you can also read my last post on [how to run Kubernetes on AWS](https://brosinski.com/post/kubernetes-on-aws-with-kops/) or try hosted Kubernetes in [Google Container Engine](https://cloud.google.com/container-engine/).
 
 ## Prequisites
 
@@ -21,9 +22,28 @@ The app can be built with `gradle clean build` which results in a standalone jar
 
 # Creating a Docker images
 
-# Running the Docker images
+We need a container which has a JDK. If you just create an Ubuntu image with the standard Oracle JDK installation, you will end up with and image size of about 1 GB. Not nice to work with. There are better options though: [Creating a minimial JDK installation based on an AlpineLinux image](https://developer.atlassian.com/blog/2015/08/minimal-java-docker-containers/).
+The `docker/minimal-java` directory contains a Dockerfile I generated taking that approach.
 
-# Publishing the Docker images
+So we'll just create our own JDK base image first:
+
+    cd docker/minimal-java
+    docker build -t sbrosinski/minimal-java .
+
+Now we create a container for our demo service inherating from that base image:
+
+    cd docker/demo-service
+    docker build -t sbrosinski/demo-service .
+
+# Running the Docker image
+
+To try it out, we can run it locally just using docker:
+
+    docker run -p 8090:8090 -t --name demo-service --rm b7i/demo-service:latest
+    curl http://localhost:8090/hello => {"greeting":"hello world"}
+    docker stop demo-service
+
+# Publishing the Docker image
 
 Kubernetes will have to pull the docker image from a registry. For this example we can use a public repository on DockerHub. Register on [docker.com](http://docker.com) to create a docker ID.
 You can now log into your DockerHub account from your machine with:
@@ -141,3 +161,6 @@ To now access the service, we can use a minikube command to tell us the exact se
 This would open your browser and point it, for example, to `http://192.168.99.100:31039`. Port 31029 is the NodePort we requested and the IP address is the address of our minikube cluster. We can now access the service routes:
 
     curl http://192.168.99.100:31039/hello => {"greeting":"hello world"}        
+
+That's it for now. To expand on this you can try the following: Make the service use a DB and play with Kubernetes persistent volumes and service discovery. 
+
