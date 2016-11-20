@@ -5,7 +5,7 @@ In this tutorial I'm using [minikube](https://github.com/kubernetes/minikube) lo
 
 ## Prequisites
 
-To follow along, check out this repo and make sure you have the following tools ready:
+To follow along, [check out this repo](https://github.com/sbrosinski/spring-boot-on-k8s) and make sure you have the following tools ready:
 
 * [docker](https://www.docker.com/products/docker#/) - to build the docker images we want to deploy
 * [minikube](https://github.com/kubernetes/minikube) - a local Kubernetes environment
