@@ -170,7 +170,7 @@ To now access the service, we can use a minikube command to tell us the exact se
 
     minikube service demo-service
 
-This would open your browser and point it, for example, to `http://192.168.99.100:31039`. Port 31029 is the NodePort we requested and the IP address is the address of our minikube cluster. We can now access the service routes:
+This would open your browser and point it, for example, to `http://192.168.99.100:31039`. Port 31039 is the NodePort we requested and the IP address is the address of our minikube cluster. We can now access the service routes:
 
     curl http://192.168.99.100:31039/hello => {"greeting":"hello world"}        
 
